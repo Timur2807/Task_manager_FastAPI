@@ -37,7 +37,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
-    tasks = relationship("Task", back_populates="owner")
+    tasks = relationship("Task", back_populates="user")
 
 
 class Task(Base):
@@ -59,6 +59,6 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     description = Column(String, index=True)
-    due_date = Column(DateTime)
+    due_date = Column(DateTime(timezone=True))
     user_id = Column(Integer, ForeignKey("users.id"))
-    owner = relationship("User ", back_populates="tasks")
+    user = relationship("User", back_populates="tasks")

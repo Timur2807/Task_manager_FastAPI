@@ -35,11 +35,11 @@ async def get_db() -> AsyncSession:
     Yields:
         AsyncSession: Асинхронная сессия базы данных.
     """
-    db = AsyncSessionLocal()
-    try:
-        yield db
-    finally:
-        await db.close()
+    async with AsyncSessionLocal() as db:
+        try:
+            yield db
+        finally:
+            await db.close()
 
 @router.post("/users/", response_model=schemas.User)
 async def create_user(

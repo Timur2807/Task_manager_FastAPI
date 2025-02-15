@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: your_user
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: your_database
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+
+  app:
+    build: .
+    container_name: fastapi_app
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:123@db:5432/task_manager_db
+    depends_on:
+      - db
+    networks:
+      - app_network
+
+  # Сервис для выполнения миграций
+  migrations:
+    build: .
+    container_name: fastapi_migrations
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:123@db:5432/task_manager_db
+    command: sh -c "sleep 5 && alembic upgrade head"
+    depends_on:
+      - db
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

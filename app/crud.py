@@ -22,6 +22,9 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from . import models, schemas
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
+from typing import List
 
 async def get_user(db: AsyncSession, user_id: int):
     """
@@ -53,7 +56,8 @@ async def create_user(db: AsyncSession, user: schemas.UserCreate):
     await db.refresh(db_user)
     return db_user
 
-async def get_tasks(db: AsyncSession, user_id: int):
+
+async def get_tasks(db: AsyncSession, user_id: int) -> List[models.Task]:
     """
     Получает список задач для конкретного пользователя.
 
@@ -64,8 +68,16 @@ async def get_tasks(db: AsyncSession, user_id: int):
     Returns:
         List[models.Task]: Список задач пользователя.
     """
-    user = await db.get(models.User, user_id)
-    return user.tasks
+    # Загружаем пользователя и связанные задачи
+    user = await db.execute(
+        select(models.User).options(selectinload(models.User.tasks)).where(models.User.id == user_id)
+    )
+    user = user.scalar_one_or_none()  # Получаем пользователя или None
+
+    if user is None:
+        return []  # Или выбросьте исключение, если пользователь не найден
+
+    return user.tasks  # Возвращаем связанные задачи
 
 async def create_user_task(db: AsyncSession, task: schemas.TaskCreate, user_id: int):
     """
