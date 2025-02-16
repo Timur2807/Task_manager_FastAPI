@@ -22,7 +22,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 DATABASE_URL = "postgresql+asyncpg://postgres:123@localhost:5432/task_manager_db"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
-AsyncSessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+AsyncSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = declarative_base()
 

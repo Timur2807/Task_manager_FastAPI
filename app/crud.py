@@ -22,22 +22,37 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from . import models, schemas
+from .models import User
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from typing import List
 
-async def get_user(db: AsyncSession, user_id: int):
+# async def get_user(db: AsyncSession, user_id: int):
+#     """
+#     Получает пользователя по его ID.
+#
+#     Args:
+#         db (AsyncSession): Асинхронная сессия SQLAlchemy.
+#         user_id (int): ID пользователя.
+#
+#     Returns:
+#         models.User: Объект пользователя, если найден, иначе None.
+#     """
+#     return await db.get(models.User, user_id)
+async def get_user(db: AsyncSession, user_id: int) -> User:
     """
-    Получает пользователя по его ID.
+    Получает пользователя по его идентификатору.
 
     Args:
-        db (AsyncSession): Асинхронная сессия SQLAlchemy.
-        user_id (int): ID пользователя.
+        db (AsyncSession): Сессия базы данных.
+        user_id (int): Идентификатор пользователя.
 
     Returns:
-        models.User: Объект пользователя, если найден, иначе None.
+        User: Найденный пользователь или None, если пользователь не найден.
     """
-    return await db.get(models.User, user_id)
+    result = await db.execute(select(models.User).filter(User.id == user_id))
+    return result.scalars().first()
+
 
 async def create_user(db: AsyncSession, user: schemas.UserCreate):
     """
@@ -75,7 +90,7 @@ async def get_tasks(db: AsyncSession, user_id: int) -> List[models.Task]:
     user = user.scalar_one_or_none()  # Получаем пользователя или None
 
     if user is None:
-        return []  # Или выбросьте исключение, если пользователь не найден
+        return [] # если пользователь не найден
 
     return user.tasks  # Возвращаем связанные задачи
 
