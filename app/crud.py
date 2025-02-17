@@ -27,18 +27,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from typing import List
 
-# async def get_user(db: AsyncSession, user_id: int):
-#     """
-#     Получает пользователя по его ID.
-#
-#     Args:
-#         db (AsyncSession): Асинхронная сессия SQLAlchemy.
-#         user_id (int): ID пользователя.
-#
-#     Returns:
-#         models.User: Объект пользователя, если найден, иначе None.
-#     """
-#     return await db.get(models.User, user_id)
+
 async def get_user(db: AsyncSession, user_id: int) -> User:
     """
     Получает пользователя по его идентификатору.
@@ -48,7 +37,7 @@ async def get_user(db: AsyncSession, user_id: int) -> User:
         user_id (int): Идентификатор пользователя.
 
     Returns:
-        User: Найденный пользователь или None, если пользователь не найден.
+        User: Найденный пользователь или None.
     """
     result = await db.execute(select(models.User).filter(User.id == user_id))
     return result.scalars().first()
@@ -83,7 +72,7 @@ async def get_tasks(db: AsyncSession, user_id: int) -> List[models.Task]:
     Returns:
         List[models.Task]: Список задач пользователя.
     """
-    # Загружаем пользователя и связанные задачи
+
     user = await db.execute(
         select(models.User).options(selectinload(models.User.tasks)).where(models.User.id == user_id)
     )
